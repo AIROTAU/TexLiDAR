@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
 import mplcursors
 
 # Constants for Lidar projections
