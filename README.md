@@ -33,9 +33,9 @@ conda activate TexLiDAR
 #### 2. Install PyTorch (with CUDA 11.8 support):  
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+```
  Note: The CUDA version depends on the hardware. Ensure that the version of CUDA you install is compatible with your GPU.
  You can refer to https://pytorch.org/get-started/locally/ to find the correct installation command for your system and CUDA version.
-```
 
 
 #### 3. Install remaining dependencies:  
@@ -51,7 +51,6 @@ print("Torch version:", torch.__version__)
 print("CUDA available:", torch.cuda.is_available())
 ```
 If `CUDA available: False`, ensure that you have installed the correct CUDA version and drivers.
-```
 
 ## Usage  
 
