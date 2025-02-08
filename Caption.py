@@ -1,21 +1,19 @@
-import torch
+"""
+This script processes an image, splits it into four sections (left, front, right, back),
+and generates detailed captions for each section using a pre-trained Florence-2 model.
+The captions are then merged into a single output, which is displayed alongside the image.
+"""
+
 import argparse
-import numpy as np
+import torch
 from PIL import Image
 import matplotlib.pyplot as plt
 from transformers import AutoProcessor, AutoModelForCausalLM
 from utils import split_image_into_sections, merge_captions
 
-# Check for GPU availability
-device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Load model and processor
-model_id = 'microsoft/Florence-2-large'
-model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True, torch_dtype='auto').eval().to(device)
-processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
-
-
-def run_example(task_prompt, image):
+def run_example(task_prompt, image, model, processor, device):
+    """Generate caption for a given image and task prompt."""
     inputs = processor(text=task_prompt, images=image, return_tensors="pt").to(device, torch.float16)
     generated_ids = model.generate(
         input_ids=inputs["input_ids"].to(device),
@@ -28,45 +26,58 @@ def run_example(task_prompt, image):
     generated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
     return generated_text
 
-# Parse command-line arguments
-parser = argparse.ArgumentParser(description="Process an image and generate captions.")
-parser.add_argument(
-    "image_path",
-    type=str,
-    nargs="?",  # Makes the argument optional
-    default="C:/TexLiDAR/Images/8344.png",  # Sets default to specific image path
-    help="Path to the input image file "
-)
-args = parser.parse_args()
 
-# Open the image from the provided path
-image = Image.open(args.image_path)
+def main():
+    # --- Argument Parsing ---
+    parser = argparse.ArgumentParser(description="Process an image and generate captions.")
+    parser.add_argument("image_path", type=str, help="Path to the input image file")
+    args = parser.parse_args()
 
-# Convert grayscale to RGB
-if image.mode == 'L':
-    image = image.convert('RGB')
+    # --- Device Configuration ---
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Convert 16-bit image to 8-bit if needed
-image_np = np.array(image)
-if image_np.dtype == np.uint16:
-    image = image.point(lambda i: i * 255.0 / 65535.0).convert('RGB')
+    # --- Model & Processor Setup ---
+    model_id = 'microsoft/Florence-2-large'
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id, trust_remote_code=True, torch_dtype='auto'
+    ).eval().to(device)
 
-# Split the image into four sections
-left, front, right, back = split_image_into_sections(image)
+    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
-# Generate captions for each direction
-captions = [run_example('<DETAILED_CAPTION>', left), run_example('<DETAILED_CAPTION>', front),
-            run_example('<DETAILED_CAPTION>', right), run_example('<DETAILED_CAPTION>', back)]
+    # --- Image Preprocessing ---
+    # Open the image from the provided path
+    image = Image.open(args.image_path)
 
-# Merge the captions into one
-merged_caption = merge_captions(captions)
+    # Convert grayscale to RGB or 16-bit to 8-bit if needed
+    if image.mode == 'L':  # Grayscale to RGB
+        image = image.convert('RGB')
+    elif image.mode == 'I;16':  # 16-bit to 8-bit
+        image = image.point(lambda i: i * 255.0 / 65535.0).convert('RGB')
 
-# Print the final merged caption
-print(f"Merged Caption:\n{merged_caption}")
+    # --- Image Splitting ---
+    left, front, right, back = split_image_into_sections(image)
 
-# Display the original image with the merged caption
-plt.figure(figsize=(10, 10))
-plt.imshow(image)
-plt.title(f'Merged Caption:\n{merged_caption}', fontsize=10, wrap=True)  # Display full caption
-plt.axis('off')  # Hide axes
-plt.show()
+    # --- Caption Generation ---
+    captions = [
+        run_example('<DETAILED_CAPTION>', left, model, processor, device),
+        run_example('<DETAILED_CAPTION>', front, model, processor, device),
+        run_example('<DETAILED_CAPTION>', right, model, processor, device),
+        run_example('<DETAILED_CAPTION>', back, model, processor, device)
+    ]
+
+    # --- Caption Merging ---
+    merged_caption = merge_captions(captions)
+
+    # --- Output ---
+    print(f"Merged Caption:\n{merged_caption}")
+
+    # Display the original image with the merged caption
+    plt.figure(figsize=(10, 10))
+    plt.imshow(image)
+    plt.title(f'Merged Caption:\n{merged_caption}', fontsize=10, wrap=True)  # Display full caption
+    plt.axis('off')  # Hide axes
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
