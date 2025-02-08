@@ -1,6 +1,6 @@
-torch==1.13.1
-transformers==4.25.1
-pillow==9.3.0
-matplotlib==3.6.0
-numpy==1.23.4
-mplcursors==0.5
+timm==1.0.14
+einops==0.8.0
+matplotlib==3.10.0
+transformers==4.48.3
+pillow==11.0.0
+mplcursors==0.6
