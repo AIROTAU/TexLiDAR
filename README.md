@@ -10,11 +10,11 @@ TexLidar is a deep-learning-based tool for extracting text and detecting objects
 
 1. Projection of a 3D point cloud onto a 2D panoramic image
 
- ![CLIP](/image/2D_3D_PC.png)
+ ![CLIP](/info/2D_3D_PC.png)
  
 2. Text generation architecture
 
- ![CLIP](/image/Architecture.png)
+ ![CLIP](/info/Architecture.png)
 
 ## Features  
 
