@@ -1,7 +1,8 @@
 # TexLiDAR: Automated Text Understanding for Panoramic LiDAR Data
-Naor Cohen, Roy Orfaig, Ben-Zion Bobrovsky
+**Naor Cohen, Roy Orfaig, Ben-Zion Bobrovsky**
 
-[[Paper]]()
+📄 [**Paper**](URL_HERE) – *TexLiDAR: Automated Text Understanding for Panoramic LiDAR Data*
+
 
 TexLidar is a deep-learning-based tool for extracting text and detecting objects from ambient images. It utilizes Microsoft's Florence-2 model to analyze images, process captions, and identify objects within different sections of an image.  
 
